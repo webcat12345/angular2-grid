@@ -50,6 +50,7 @@ export interface NgGridItemConfig {
     minWidth?: number;
     minHeight?: number;
     resizeDirections?: string[];
+    active?: boolean;
 }
 
 export interface NgGridItemEvent {

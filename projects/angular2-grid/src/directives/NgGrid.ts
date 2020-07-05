@@ -484,17 +484,17 @@ export class NgGrid implements OnInit, DoCheck, OnDestroy {
     }
 
     public resizeEventHandler(e: any): void {
-        this._calculateColWidth();
-        this._calculateRowHeight();
+        // this._calculateColWidth();
+        // this._calculateRowHeight();
 
-        this._updateRatio();
+        // this._updateRatio();
 
         if (this._limitToScreen) {
             const newMaxColumns = this._getContainerColumns();
             if (this._maxCols !== newMaxColumns) {
                 this._maxCols = newMaxColumns;
-                this._updatePositionsAfterMaxChange();
-                this._cascadeGrid();
+                // this._updatePositionsAfterMaxChange();
+                // this._cascadeGrid();
             }
 
             if (this._centerToScreen) {
@@ -510,12 +510,12 @@ export class NgGrid implements OnInit, DoCheck, OnDestroy {
             });
         }
 
-        this._updateSize();
+        // this._updateSize();
     }
 
     public mouseDownEventHandler(e: MouseEvent | TouchEvent): void {
         var mousePos = this._getMousePosition(e);
-        var item = this._getItemFromPosition(mousePos);
+        var item = this._getItemFromPosition(mousePos, e);
 
         if (item == null) return;
 
@@ -705,6 +705,7 @@ export class NgGrid implements OnInit, DoCheck, OnDestroy {
         if (!this.dragEnable || !this._draggingItem) return;
 
         //    Start dragging
+        console.log(this._draggingItem);
         this._draggingItem.startMoving();
         this._removeFromGrid(this._draggingItem);
         this._createPlaceholder(this._draggingItem);
@@ -969,13 +970,7 @@ export class NgGrid implements OnInit, DoCheck, OnDestroy {
     }
 
     private _hasGridCollision(pos: NgGridItemPosition, dims: NgGridItemSize): boolean {
-        var positions = this._getCollisions(pos, dims);
-
-        if (positions == null || positions.length == 0) return false;
-
-        return positions.some((v: NgGridItem) => {
-            return !(v === null);
-        });
+        return false;
     }
 
     private _getCollisions(pos: NgGridItemPosition, dims: NgGridItemSize): Array<NgGridItem> {
@@ -1418,15 +1413,23 @@ export class NgGrid implements OnInit, DoCheck, OnDestroy {
     private _getScreenMargin(): number {
         const maxWidth: number = this._ngEl.nativeElement.getBoundingClientRect().width;
         const itemWidth: number = this.colWidth + this.marginLeft + this.marginRight;
-        return Math.floor((maxWidth - (this._maxCols * itemWidth)) / 2);;
+        return Math.floor((maxWidth - (this._maxCols * itemWidth)) / 2);
     }
 
-    private _getItemFromPosition(position: NgGridRawPosition): NgGridItem {
+    private _getItemFromPosition(position: NgGridRawPosition, e?: any): NgGridItem {
         return Array.from(this._itemsInGrid, (itemId: string) => this._items.get(itemId)).find((item: NgGridItem) => {
             if (!item) return false;
 
             const size: NgGridItemDimensions = item.getDimensions();
             const pos: NgGridRawPosition = item.getPosition();
+
+            if (e) {
+              if (e.target.closest('.modal-window.grid-item') === item.containerRef.element.nativeElement) {
+                return true;
+              } else {
+                return false;
+              }
+            }
 
             return position.left >= pos.left && position.left < (pos.left + size.width) &&
             position.top >= pos.top && position.top < (pos.top + size.height);
